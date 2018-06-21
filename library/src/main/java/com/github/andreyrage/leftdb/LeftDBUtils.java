@@ -36,6 +36,7 @@ import com.github.andreyrage.leftdb.annotation.ColumnChild;
 import com.github.andreyrage.leftdb.annotation.ColumnDAO;
 import com.github.andreyrage.leftdb.annotation.ColumnIgnore;
 import com.github.andreyrage.leftdb.annotation.ColumnName;
+import com.github.andreyrage.leftdb.annotation.ColumnNotNull;
 import com.github.andreyrage.leftdb.annotation.ColumnPrimaryKey;
 import com.github.andreyrage.leftdb.annotation.TableName;
 import com.github.andreyrage.leftdb.config.RelationshipConfig;
@@ -1232,79 +1233,48 @@ public abstract class LeftDBUtils implements LeftDBHandler.OnDbChangeCallback {
                     }
 
                     Class<?> fieldType = field.getType();
-                    if (fieldType.isAssignableFrom(String.class)) {
-                        builder.append(columnName);
-                        builder.append(" TEXT");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(long.class) || fieldType.isAssignableFrom(Long.class)) {
+                    if (fieldType.isAssignableFrom(long.class) || fieldType.isAssignableFrom(Long.class)) {
                         builder.append(columnName);
                         builder.append(" INTEGER");
                         if (field.isAnnotationPresent(ColumnAutoInc.class)) {
-                            builder.append(" PRIMARY KEY AUTOINCREMENT");
+                            builder.append(" NOT NULL PRIMARY KEY AUTOINCREMENT");
                         } else if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
+                            builder.append(" NOT NULL PRIMARY KEY");
                         }
-                    } else if (fieldType.isAssignableFrom(int.class) || fieldType.isAssignableFrom(Integer.class)) {
-                        builder.append(columnName);
-                        builder.append(" INTEGER");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
+                    } else {
+                        String columnType = null;
+                        if (fieldType.isAssignableFrom(String.class)) {
+                            columnType = "TEXT";
+                        } else  if (fieldType.isAssignableFrom(int.class) || fieldType.isAssignableFrom(Integer.class)) {
+                            columnType = "INTEGER";
+                        } else if (fieldType.isAssignableFrom(short.class) || fieldType.isAssignableFrom(Short.class)) {
+                            columnType = "INTEGER";
+                        } else if (fieldType.isAssignableFrom(boolean.class) || fieldType.isAssignableFrom(Boolean.class)) {
+                            columnType = "INTEGER";
+                        } else if (fieldType.isAssignableFrom(float.class) || fieldType.isAssignableFrom(Float.class)) {
+                            columnType = "REAL";
+                        } else if (fieldType.isAssignableFrom(double.class) || fieldType.isAssignableFrom(Double.class)) {
+                            columnType = "REAL";
+                        } else if (fieldType.isAssignableFrom(BigDecimal.class)) {
+                            columnType = "TEXT";
+                        } else if (fieldType.isAssignableFrom(Date.class)) {
+                            columnType = "INTEGER";
+                        } else if (fieldType.isAssignableFrom(Calendar.class)) {
+                            columnType = "INTEGER";
+                        } else if (field.isAnnotationPresent(ColumnDAO.class)) {
+                            columnType = "TEXT";
+                        } else if (Serializable.class.isAssignableFrom(fieldType.getClass())) {
+                            columnType = "BLOB";
                         }
-                    } else if (fieldType.isAssignableFrom(short.class) || fieldType.isAssignableFrom(Short.class)) {
-                        builder.append(columnName);
-                        builder.append(" INTEGER");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(boolean.class) || fieldType.isAssignableFrom(Boolean.class)) {
-                        builder.append(columnName);
-                        builder.append(" INTEGER");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(float.class) || fieldType.isAssignableFrom(Float.class)) {
-                        builder.append(columnName);
-                        builder.append(" REAL");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(double.class) || fieldType.isAssignableFrom(Double.class)) {
-                        builder.append(columnName);
-                        builder.append(" REAL");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(BigDecimal.class)) {
-                        builder.append(columnName);
-                        builder.append(" TEXT");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(Date.class)) {
-                        builder.append(columnName);
-                        builder.append(" INTEGER");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (fieldType.isAssignableFrom(Calendar.class)) {
-                        builder.append(columnName);
-                        builder.append(" INTEGER");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (field.isAnnotationPresent(ColumnDAO.class)) {
-                        builder.append(columnName);
-                        builder.append(" TEXT");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
-                        }
-                    } else if (Serializable.class.isAssignableFrom(fieldType.getClass())) {
-                        builder.append(columnName);
-                        builder.append(" BLOB");
-                        if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
-                            builder.append(" PRIMARY KEY");
+                        if (columnType != null) {
+                            builder.append(columnName);
+                            builder.append(" ").append(columnType);
+                            if (field.isAnnotationPresent(ColumnNotNull.class)) {
+                                builder.append(" NOT NULL");
+                            }
+                            if (field.isAnnotationPresent(ColumnPrimaryKey.class)) {
+                                builder.append(" PRIMARY KEY");
+                            }
                         }
                     }
 
